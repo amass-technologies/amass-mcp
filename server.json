@@ -3,7 +3,7 @@
   "name": "tech.amass/amass",
   "title": "Amass",
   "description": "Linked life-science search: 40M+ papers, 1.2M+ trials, drugs, genes, FDA/EMA approvals, patents.",
-  "version": "1.0.0",
+  "version": "6.0.0",
   "websiteUrl": "https://amass.tech",
   "repository": {
     "url": "https://github.com/amass-technologies/amass-mcp",
