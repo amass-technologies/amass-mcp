@@ -70,7 +70,7 @@ rather than under a GitHub org.
 3. Merge, then tag:
 
    ```bash
-   git tag v6.0.0 && git push origin v6.0.0
+   git tag vX.Y.Z && git push origin vX.Y.Z    # must match "version" in server.json
    ```
 
 The tag must match `version` in `server.json` or the workflow fails.
