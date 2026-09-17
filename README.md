@@ -2,8 +2,7 @@
 
 This repo holds the [MCP Registry](https://modelcontextprotocol.io/registry/about)
 listing for the Amass MCP server. It is metadata only: the server itself is a
-hosted service at `https://mcp.amass.tech/mcp`, and its source lives in the
-private Amass monorepo under `mcp/`.
+hosted service at `https://mcp.amass.tech/mcp`.
 
 ## Connecting to the server
 
@@ -14,20 +13,15 @@ only need the URL:
 https://mcp.amass.tech/mcp
 ```
 
-Your client will be redirected to sign in with your Amass account. You can also
-authenticate with an Amass API key (`amass_…`) as a bearer token.
+Your client will be redirected to sign in with your Amass account.
+The server exposes search and get tools over linked life-science Cores.
 
-The server exposes search and get tools over six linked life-science Cores —
-BioMedCore (publications), TrialCore (clinical trials), DrugCore, GeneCore,
-RegulatoryCore (FDA + EMA) and PatentCore — plus `send_feedback` for reporting
-data issues.
-
-Docs: <https://amass.tech> · Platform: <https://platform.amass.tech>
+Website: <https://amass.tech> · Platform: <https://platform.amass.tech>
 
 ## How publishing works
 
 `server.json` is the source of truth for the listing. The registry authenticates
-us by DNS: a TXT record on `amass.tech` carries the public half of an Ed25519
+by DNS: a TXT record on `amass.tech` carries the public half of an Ed25519
 key, and CI signs with the private half. That is why the listing is namespaced
 `tech.amass/…` rather than under a GitHub org.
 
@@ -49,7 +43,7 @@ delete the local `key.pem`.
 3. Merge, then tag:
 
    ```bash
-   git tag v1.0.1 && git push origin v1.0.1
+   git tag v6.0.0 && git push origin v6.0.0
    ```
 
 The tag must match `version` in `server.json` or the workflow fails.
@@ -74,5 +68,4 @@ curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=tech.amass/am
 - **`description` is capped at 100 characters.** CI enforces this.
 - **Published versions are immutable**, and servers currently **cannot be
   deleted or unpublished** — corrections ship as a new version.
-- The `version` here describes *the listing*, not the deployed build. It is
-  deliberately decoupled from `mcp/package.json` in the monorepo.
+- The `version` here describes *the listing*, not the deployed build.
