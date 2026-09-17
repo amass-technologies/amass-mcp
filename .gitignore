@@ -1,0 +1,6 @@
+# DNS auth signing keys — never commit these.
+# The private key belongs in 1Password and the MCP_PRIVATE_KEY repo secret.
+*.pem
+key.txt
+
+.DS_Store

@@ -1,0 +1,89 @@
+name: Publish to MCP Registry
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths: ["server.json"]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate server.json
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # The registry caps description at 100 chars and rejects a version that
+      # was already published. Catching both here beats a failed publish on a
+      # tag that cannot be reused.
+      - name: Check schema constraints
+        run: |
+          python3 - <<'PY'
+          import json, sys
+          s = json.load(open("server.json"))
+          errs = []
+          if len(s["description"]) > 100:
+              errs.append(f'description is {len(s["description"])} chars, max 100')
+          if len(s.get("title", "")) > 100:
+              errs.append(f'title is {len(s["title"])} chars, max 100')
+          if s["version"] in ("latest",) or s["version"].startswith("^"):
+              errs.append(f'version {s["version"]!r} is not a concrete version')
+          for e in errs:
+              print(f"::error file=server.json::{e}")
+          sys.exit(1 if errs else 0)
+          PY
+
+      - name: Check version is not already published
+        run: |
+          NAME=$(jq -r .name server.json)
+          VERSION=$(jq -r .version server.json)
+          if curl -sf "https://registry.modelcontextprotocol.io/v0.1/servers?search=${NAME}" \
+              | jq -e --arg v "$VERSION" '.servers[] | select(.server.version == $v)' > /dev/null; then
+            echo "::error file=server.json::version $VERSION of $NAME is already published; bump it"
+            exit 1
+          fi
+          echo "$NAME $VERSION is unpublished — OK"
+
+      - name: Check the remote endpoint is reachable
+        run: |
+          URL=$(jq -r '.remotes[0].url' server.json)
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$URL" \
+            -H 'Content-Type: application/json' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}')
+          # 401 is the expected answer: the server is up and demanding OAuth.
+          if [ "$CODE" != "401" ]; then
+            echo "::error::$URL returned $CODE, expected 401"
+            exit 1
+          fi
+          echo "$URL is up and challenging for auth — OK"
+
+  publish:
+    name: Publish
+    needs: validate
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # On a tag, the tag is the source of truth for what we meant to ship;
+      # server.json must agree or we would publish a version nobody tagged.
+      - name: Check tag matches server.json version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          VERSION=$(jq -r .version server.json)
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::tag v$TAG does not match server.json version $VERSION"
+            exit 1
+          fi
+
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      - name: Authenticate to MCP Registry
+        run: ./mcp-publisher login dns --domain amass.tech --private-key "${{ secrets.MCP_PRIVATE_KEY }}"
+
+      - name: Publish
+        run: ./mcp-publisher publish
