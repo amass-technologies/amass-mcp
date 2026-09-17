@@ -75,8 +75,7 @@ rather than under a GitHub org.
 
 The tag must match `version` in `server.json` or the workflow fails.
 
-The listing `version` tracks the major version of the deployed MCP server; it is
-deliberately decoupled from `mcp/package.json` in the application repo.
+The listing `version` tracks the major version of the deployed MCP server.
 
 ### One-time DNS auth setup
 
