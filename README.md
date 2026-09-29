@@ -23,6 +23,10 @@ OAuth flow can instead send an Amass API key (`amass_…`) as a bearer token.
 
 Or install it from the registry by name: `tech.amass/amass`.
 
+The server supports every MCP protocol revision from 2024-10-07 through
+2026-07-28. Clients on 2026-07-28 are served per request, with no `initialize`
+handshake or session; the tools are identical on every revision.
+
 ## What you get
 
 Six Cores, cross-linked so you can move between them in a single query —
@@ -31,7 +35,7 @@ patents ↔ drugs/publications.
 
 | Core | Contents |
 | --- | --- |
-| **BioMedCore** | 40M+ biomedical publications (PubMed/PMC-derived) with abstracts, authors, journal metadata, citations, MeSH terms and optional fulltext |
+| **BioMedCore** | 43M+ biomedical publications (PubMed/PMC-derived) with abstracts, authors, journal metadata, citations, MeSH terms and optional fulltext, plus conference abstracts from society meetings |
 | **TrialCore** | 1.2M+ clinical trials (ClinicalTrials.gov + WHO ICTRP non-US registries) with phase, status, sponsor, conditions, interventions, enrollment and outcomes |
 | **DrugCore** | 22K+ harmonized drugs/molecules (ChEMBL-anchored) with modality, clinical stage, chemical structure, synonyms and trade names |
 | **GeneCore** | 43K+ harmonized genes (Ensembl-anchored) with biotype, RefSeq summary, tractability/safety intelligence and UniProt protein annotations |
@@ -42,6 +46,12 @@ Each Core has a `search_amass_<core>_records` tool for discovery and a
 `get_amass_<core>_record` tool for fetching a known identifier. RegulatoryCore
 adds `get_amass_regulatorycore_document_section` for full source-document text,
 and `send_feedback` reports data issues straight to the Amass data team.
+
+Every search tool takes a `limit` (1–50, default 10). BioMedCore, TrialCore,
+GeneCore and RegulatoryCore search also take `minLastUpdateDate` and
+`minCreateDate`, which filter on when Amass last updated a record or first
+ingested it. Use them for "what changed since I last looked" questions. Every
+record carries a `url` that links to its source.
 
 Website: <https://amass.tech> · Platform: <https://platform.amass.tech> ·
 API docs: <https://mcp.amass.tech/api/doc>
