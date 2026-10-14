@@ -36,7 +36,7 @@ patents ↔ drugs/publications.
 | Core | Contents |
 | --- | --- |
 | **BioMedCore** | 43M+ biomedical publications (PubMed/PMC-derived) with abstracts, authors, journal metadata, citations, MeSH terms and optional fulltext, plus conference abstracts from society meetings |
-| **TrialCore** | 1.2M+ clinical trials (ClinicalTrials.gov + WHO ICTRP non-US registries) with phase, status, sponsor, conditions, interventions, enrollment and outcomes |
+| **TrialCore** | 1.2M+ clinical trials (ClinicalTrials.gov + WHO ICTRP non-US registries) with phase, status, sponsor and collaborators, conditions, interventions and arms, enrollment, registered endpoints and posted results |
 | **DrugCore** | 22K+ harmonized drugs/molecules (ChEMBL-anchored) with modality, clinical stage, chemical structure, synonyms and trade names |
 | **GeneCore** | 43K+ harmonized genes (Ensembl-anchored) with biotype, RefSeq summary, tractability/safety intelligence and UniProt protein annotations |
 | **RegulatoryCore** | Unified FDA + EMA authorizations with approval status, orphan designations, and parsed source documents (labels, SmPCs, reviews, EPARs) |
@@ -47,11 +47,14 @@ Each Core has a `search_amass_<core>_records` tool for discovery and a
 adds `get_amass_regulatorycore_document_section` for full source-document text,
 and `send_feedback` reports data issues straight to the Amass data team.
 
-Every search tool takes a `limit` (1–50, default 10). BioMedCore, TrialCore,
-GeneCore and RegulatoryCore search also take `minLastUpdateDate` and
-`minCreateDate`, which filter on when Amass last updated a record or first
-ingested it. Use them for "what changed since I last looked" questions. Every
-record carries a `url` that links to its source.
+Every search tool takes a `limit` (1–50, default 10). Every search except
+PatentCore also takes `minLastUpdateDate` and `minCreateDate`, which filter on
+when Amass last updated a record or first ingested it. Use them for "what
+changed since I last looked" questions. Publication, patent, trial start and
+trial completion dates can be bounded on both ends, and BioMedCore search can be
+narrowed to given journals (`journalIssns`) or publication types
+(`publicationTypes`, e.g. `Clinical Trial` or `Conference`). Every record
+carries a `url` that links to its source.
 
 Website: <https://amass.tech> · Platform: <https://platform.amass.tech> ·
 API docs: <https://mcp.amass.tech/api/doc>
