@@ -77,7 +77,13 @@ rather than under a GitHub org.
 
 ### Publishing a new version
 
-1. Edit `server.json` and bump `version`.
+Each `## vN` entry in the [MCP changelog](https://platform.amass.tech/markdown/getting-started/mcp-changelog.md)
+becomes listing version `N.0.0`, but only once the server is actually deployed.
+Check that the new parameters appear in the live tool schemas before bumping.
+
+1. On a `release-N` branch, bump `version` in `server.json`. Update the README's
+   "What you get" for anything user-facing in the changelog entry, and update
+   `description` if a headline count moved.
 2. Open a PR — CI validates the file, checks the version is not already
    published, and confirms `https://mcp.amass.tech/mcp` is up.
 3. Merge, then tag:
@@ -85,6 +91,17 @@ rather than under a GitHub org.
    ```bash
    git tag vX.Y.Z && git push origin vX.Y.Z    # must match "version" in server.json
    ```
+
+4. A second admin approves the `mcp-registry` deployment on the tag's Actions
+   run. Publishing waits there until they do.
+5. Create the GitHub Release and point back to the changelog:
+
+   ```bash
+   gh release create vX.Y.Z --verify-tag --latest \
+     --title "vX.Y.Z — aligned with MCP server vX" --notes "…"
+   ```
+
+6. Delete the local `release-N` branch. GitHub drops the remote one on merge.
 
 The tag must match `version` in `server.json` or the workflow fails.
 
